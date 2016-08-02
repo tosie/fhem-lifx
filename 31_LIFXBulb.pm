@@ -118,6 +118,10 @@ sub LIFXBulb_Set($@)
         $bulb = $lifx->get_bulb_by_mac($id);
     }
 
+    if (!defined($bulb)) {
+        return undef;
+    }
+
     if ($args[0] eq 'on') {
         $bulb->on();
         $hash->{STATE} = 'on';
@@ -126,29 +130,47 @@ sub LIFXBulb_Set($@)
         $hash->{STATE} = 'off';
     } elsif ($args[0] eq 'color') {
         my ($color,$t) = @args[1 .. $#args];
-		my $hsv = Imager::Color->new("#".$color);
-		my ($h, $s, $b) = $hsv->hsv();
-		print Dumper($h/360*65535, $b*100, $s*100);
-		
+	my $hsv = Imager::Color->new("#".$color);
+	my ($h, $s, $b) = $hsv->hsv();
+	print Dumper($h/360*65535, $b*100, $s*100);
         $bulb->color([sprintf("%d", $h/360*65535),sprintf("%d", $s*100), sprintf( "%d", $b*100),0], $t);
+    } elsif ($args[0] eq 'hue') {
+	my $color = $bulb->color;
+        my $t     = $args[2] | 0;
+        my $h     = $args[1] | 0;
+        my $s     = $color->[1];
+        my $b     = $color->[2];
+        my $k     = $color->[3];
+	$bulb->color([sprintf("%d", ($h+1)/360*65535), $s, $b, $k], $t);
+    } elsif ($args[0] eq 'saturation') {
+        my $color = $bulb->color;
+        my $t     = $args[2] | 0;
+        my $h     = $color->[0];
+        my $s     = $args[1] | 100;
+        my $b     = $color->[2];
+        my $k     = $color->[3];
+        $bulb->color([$h, $s, $b, $k], $t);
     } elsif ($args[0] eq 'kelvin') {
         my $color = $bulb->color();
         my $k     = $args[1];
         my $t     = $args[2] | 0;
         $bulb->color([0,0,$color->[2],$k], $t);
-    } 	elsif ($args[0] eq 'brightness') {
-	        my $color = $bulb->color();
-	        my $t     = $args[2] | 1;
-	
-	        $bulb->color([$color->[0],$color->[1],$args[1],$color->[3]], $t);
-	    } elsif ($args[0] eq 'rgb') {
+    } elsif ($args[0] eq 'brightness') {
+        my $color = $bulb->color();
+        my $t     = $args[2] | 1;
+        my $h     = $color->[0];
+        my $s     = $color->[1];
+        my $b     = $args[1];
+        my $k     = $color->[3];
+        $bulb->color([$h, $s, $b, $k], $t);
+    } elsif ($args[0] eq 'rgb') {
         my ($r,$g,$b) = ($args[1] =~ m/(..)(..)(..)/);
         ($r,$g,$b)    = map {hex($_)} ($r,$g,$b);
         $bulb->rgb([$r,$g,$b], 0);
+    } else {
+        return "off:noArg on:noArg toggle:noArg color:colorpicker,RGB hue:slider,0,1,359 saturation:slider,0,1,100 brightness:slider,0,1,100 kelvin:slider,2500,1,7000";
     }
-    else {
-        return "off:noArg on:noArg toggle:noArg color:colorpicker,RGB brightness:slider,0,1,100 kelvin:slider,2500,1,7000";
-    }
+
     return undef;
 }
 
