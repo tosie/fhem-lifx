@@ -22,8 +22,9 @@ sub LIFXBridge_Initialize($$)
     $hash->{ReadFn}   = "LIFXBridge_Read";
     $hash->{Clients}  = ":LIFXBulb:";
 
-    #Consumer
+    # Consumer
     $hash->{DefFn}    = "LIFXBridge_Define";
+    $hash->{UndefFn}  = "LIFXBridge_Undefine";
     $hash->{AttrList} = "key";
 }
 
@@ -48,6 +49,20 @@ sub LIFXBridge_Define($$)
 
     return undef;
 }
+
+sub LIFXBridge_Undefine($$)
+{
+    my ($hash, $def) = @_;
+    my $socket = $hash->{lifx}{lifx}->socket();
+    
+    RemoveInternalTimer($hash);
+
+    shutdown($socket, 2) if $socket;
+    close($socket) if $socket;
+    
+    return undef;
+}
+
 
 sub LIFXBridge_GetUpdate($)
 {
