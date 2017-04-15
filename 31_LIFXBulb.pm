@@ -129,11 +129,13 @@ sub LIFXBulb_Set($@)
         $bulb->off();
         $hash->{STATE} = 'off';
     } elsif ($args[0] eq 'color') {
-        my ($color,$t) = @args[1 .. $#args];
-	my $hsv = Imager::Color->new("#".$color);
-	my ($h, $s, $b) = $hsv->hsv();
-	print Dumper($h/360*65535, $b*100, $s*100);
-        $bulb->color([sprintf("%d", $h/360*65535),sprintf("%d", $s*100), sprintf( "%d", $b*100),0], $t);
+        my ($color, $t) = @args[1 .. $#args];
+        my $hsv = Imager::Color->new("#".$color);
+        my ($h, $s, $b) = $hsv->hsv();
+        
+        $t = defined $t ? $t : 1;
+        
+        $bulb->color([sprintf("%d", $h/360*65535), sprintf("%d", $s*100), sprintf( "%d", $b*100), 0], $t);
     } elsif ($args[0] eq 'hue') {
 	my $color = $bulb->color;
         my $t     = $args[2] | 0;
