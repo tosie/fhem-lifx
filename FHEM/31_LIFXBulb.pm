@@ -43,6 +43,7 @@ sub LIFXBulb_Parse($$)
 		my $color = $msg->color();
 	
         readingsBeginUpdate($bulb_hash);
+		readingsBulkUpdate($bulb_hash, "state", $bulb_hash->{STATE}, 1);
 		readingsBulkUpdate($bulb_hash, "hue", $color->[0], 1);
 		readingsBulkUpdate($bulb_hash, "saturation", $color->[1], 1);
 		readingsBulkUpdate($bulb_hash, "brightness", $color->[2], 1);
@@ -127,9 +128,15 @@ sub LIFXBulb_Set($@)
     if ($args[0] eq 'on') {
         $bulb->on();
         $hash->{STATE} = 'on';
+        readingsBeginUpdate($hash);
+        readingsBulkUpdate($hash, "state", $bulb_hash->{STATE}, 1);
+        readingsEndUpdate($hash, 1);
     } elsif ($args[0] eq 'off') {
         $bulb->off();
         $hash->{STATE} = 'off';
+        readingsBeginUpdate($hash);
+        readingsBulkUpdate($hash, "state", $bulb_hash->{STATE}, 1);
+        readingsEndUpdate($hash, 1);
     } elsif ($args[0] eq 'color') {
         my ($color, $t) = @args[1 .. $#args];
         my $hsv = Imager::Color->new("#".$color);
