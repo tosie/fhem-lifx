@@ -129,13 +129,13 @@ sub LIFXBulb_Set($@)
         $bulb->on();
         $hash->{STATE} = 'on';
         readingsBeginUpdate($hash);
-        readingsBulkUpdate($hash, "state", $bulb_hash->{STATE}, 1);
+        readingsBulkUpdate($hash, "state", $hash->{STATE}, 1);
         readingsEndUpdate($hash, 1);
     } elsif ($args[0] eq 'off') {
         $bulb->off();
         $hash->{STATE} = 'off';
         readingsBeginUpdate($hash);
-        readingsBulkUpdate($hash, "state", $bulb_hash->{STATE}, 1);
+        readingsBulkUpdate($hash, "state", $hash->{STATE}, 1);
         readingsEndUpdate($hash, 1);
     } elsif ($args[0] eq 'color') {
         my ($color, $t) = @args[1 .. $#args];
